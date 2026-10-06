@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pool } from "@/lib/db";
-import { PRAZOS, MULTA_CENTIMOS } from "@/lib/constants";
+import { PRAZOS, MULTA_CENTIMOS, capaUrl } from "@/lib/constants";
 import { utilizadorAtual } from "@/lib/auth";
 import { preRequisitarAction } from "../../actions";
 import { AvaliarForm } from "@/components/AvaliarForm";
@@ -67,7 +67,7 @@ export default async function LivroPage({ params }: { params: Promise<{ id: stri
           {livro.capa ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={`${process.env.NEXT_PUBLIC_CAPAS_BASE_URL}/${livro.capa}`}
+              src={capaUrl(livro.capa)}
               alt={`Capa de ${livro.titulo}`}
               className="w-full aspect-[2/3] object-cover rounded border border-linha"
             />

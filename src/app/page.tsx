@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { pool } from "@/lib/db";
-import { PRAZOS } from "@/lib/constants";
+import { PRAZOS, capaUrl } from "@/lib/constants";
 import type { Livro } from "@/lib/types";
 
 export default async function CatalogoPage({
@@ -116,7 +116,7 @@ export default async function CatalogoPage({
                 {livro.capa ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={`${process.env.NEXT_PUBLIC_CAPAS_BASE_URL}/${livro.capa}`}
+                    src={capaUrl(livro.capa)}
                     alt={`Capa de ${livro.titulo}`}
                     className="w-full aspect-[2/3] object-cover"
                   />

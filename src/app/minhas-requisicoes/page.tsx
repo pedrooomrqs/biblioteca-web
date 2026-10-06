@@ -2,47 +2,15 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { pool } from "@/lib/db";
 import { utilizadorAtual } from "@/lib/auth";
-import { PRAZOS, MULTA_CENTIMOS } from "@/lib/constants";
+import { dataPt, estadoVisual, euros, manutencaoRequisicoes } from "@/lib/requisicoes";
 import { cancelarRequisicaoAction } from "../actions";
 import type { Requisicao } from "@/lib/types";
-
-function euros(centimos: number): string {
-  return (centimos / 100).toFixed(2).replace(".", ",") + "€";
-}
-
-function dataPt(data: string | null): string {
-  if (!data) return "—";
-  const [ano, mes, dia] = data.slice(0, 10).split("-");
-  return `${dia}/${mes}/${ano}`;
-}
-
-function estadoVisual(r: Requisicao): [string, string] {
-  const emAtraso = r.estado === "entregue" && !!r.data_limite && r.data_limite < new Date().toISOString().slice(0, 10);
-  if (emAtraso) return ["Em atraso", "bg-red-100 text-red-800"];
-  switch (r.estado) {
-    case "pre_requisitado":
-      return ["Pré-requisitado", "bg-sky-100 text-sky-800"];
-    case "entregue":
-      return ["Entregue", "bg-amber-100 text-amber-800"];
-    case "devolvido":
-      return ["Devolvido", "bg-green-100 text-green-800"];
-    default:
-      return ["Cancelado", "bg-gray-200 text-gray-700"];
-  }
-}
 
 export default async function MinhasRequisicoesPage() {
   const utilizador = await utilizadorAtual();
   if (!utilizador) redirect("/entrar?next=/minhas-requisicoes");
 
-  // Aplica multas e cancela pré-requisições paradas há mais de 2 dias, tal como o site PHP.
-  await pool.query(
-    "UPDATE requisicoes SET multa_centimos = $1 WHERE estado = 'entregue' AND data_limite < CURRENT_DATE AND multa_centimos = 0",
-    [MULTA_CENTIMOS]
-  );
-  await pool.query(
-    "UPDATE requisicoes SET estado = 'cancelado' WHERE estado = 'pre_requisitado' AND pedida_em < (NOW() - make_interval(days => 2))"
-  );
+  await manutencaoRequisicoes();
 
   const { rows: requisicoes } = await pool.query<Requisicao>(
     `SELECT r.*, l.titulo, l.autor, l.capa, l.prazo FROM requisicoes r

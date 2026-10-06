@@ -35,6 +35,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/minhas-requisicoes" className="hover:underline">
                     As minhas requisições
                   </Link>
+                  {utilizador.tipo === "admin" && (
+                    <Link href="/admin" className="hover:underline">
+                      Administração
+                    </Link>
+                  )}
                   <span className="text-white/80">{utilizador.nome}</span>
                   <form action={sairAction}>
                     <button

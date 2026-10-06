@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { pool } from "./db";
 import { getSession } from "./session";
 import type { UtilizadorPublico } from "./types";
@@ -11,4 +12,12 @@ export async function utilizadorAtual(): Promise<UtilizadorPublico | null> {
     [session.utilizadorId]
   );
   return rows[0] ?? null;
+}
+
+/** Só deixa passar a conta de administração; os outros voltam ao catálogo (ou ao login). */
+export async function exigirAdmin(): Promise<UtilizadorPublico> {
+  const utilizador = await utilizadorAtual();
+  if (!utilizador) redirect("/entrar?next=/admin");
+  if (utilizador.tipo !== "admin") redirect("/");
+  return utilizador;
 }
