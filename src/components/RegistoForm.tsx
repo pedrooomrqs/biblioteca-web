@@ -32,7 +32,7 @@ export function RegistoForm() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Turma</label>
-            <input name="turma" maxLength={30} placeholder="ex.: 9.º B" className="w-full rounded border border-linha px-3 py-2 text-sm" />
+            <input name="turma" maxLength={30} placeholder="9.º ao 12.º, ex.: 9.º B" className="w-full rounded border border-linha px-3 py-2 text-sm" />
           </div>
         </div>
         <div>

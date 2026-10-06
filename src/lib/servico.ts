@@ -62,6 +62,10 @@ export async function registar(
   if ((tipo === "aluno" || tipo === "professor") && turma === "") {
     return { erro: "Indica a turma." };
   }
+  // A escola só tem do 9.º ao 12.º ano: a turma de um aluno tem de começar por 9, 10, 11 ou 12.
+  if (tipo === "aluno" && !/^(9|1[0-2])(?!\d)/.test(turma)) {
+    return { erro: "A escola só tem do 9.º ao 12.º ano. Indica uma turma como 9.º B ou 12.º N." };
+  }
   if (turma.length > 30) {
     return { erro: "A turma é demasiado longa." };
   }
