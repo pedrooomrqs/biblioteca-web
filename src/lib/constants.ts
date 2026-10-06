@@ -12,6 +12,12 @@ export const TIPOS_UTILIZADOR: Record<string, string> = {
   admin: "Administradora",
 };
 
+// Géneros sugeridos no formulário do livro (pode escrever-se outro).
+export const GENEROS_SUGERIDOS = [
+  "Romance", "Fantasia", "Ficção científica", "Policial", "Poesia", "Teatro",
+  "Contos", "Infantil", "Manga", "Banda desenhada", "História", "Ciência", "Biografia",
+];
+
 export const TIPOS_REGISTAVEIS = ["aluno", "professor", "funcionario"] as const;
 
 // As capas estão num bucket público do Supabase Storage (o endereço não é segredo).

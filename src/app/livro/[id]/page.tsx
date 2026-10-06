@@ -53,6 +53,7 @@ export default async function LivroPage({ params }: { params: Promise<{ id: stri
           ) : (
             <p className="text-suave text-sm mt-1">Ainda sem avaliações</p>
           )}
+          {livro.genero && <p className="text-suave text-sm mt-1">Género: {livro.genero}</p>}
           {livro.isbn && <p className="text-suave text-sm mt-1">ISBN {livro.isbn}</p>}
 
           <div className="flex flex-wrap gap-2 mt-3">

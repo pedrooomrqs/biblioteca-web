@@ -150,7 +150,7 @@ export async function listarLivros(filtros: FiltrosCatalogo): Promise<Livro[]> {
 
   if (q !== "") {
     params.push(`%${q}%`, `%${q.replace(/[\s-]/g, "")}%`);
-    condicoes.push(`(b.titulo ILIKE $1 OR b.autor ILIKE $1 OR b.isbn ILIKE $2)`);
+    condicoes.push(`(b.titulo ILIKE $1 OR b.autor ILIKE $1 OR b.genero ILIKE $1 OR b.isbn ILIKE $2)`);
   }
   if (filtros.disponibilidade === "disponivel") {
     condicoes.push(`b.so_consulta = 0 AND ${SQL_DISPONIVEIS} > 0`);

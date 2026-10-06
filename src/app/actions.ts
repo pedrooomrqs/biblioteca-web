@@ -6,9 +6,12 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/session";
 import { utilizadorAtual } from "@/lib/auth";
 import { autenticar, avaliar, cancelarRequisicao, preRequisitar, registar } from "@/lib/servico";
+import { valoresDoFormulario } from "@/lib/formularios";
 
 export interface EstadoFormulario {
   erro?: string;
+  /** O que a pessoa tinha escrito, para o formulário não ficar vazio depois de um erro. */
+  valores?: Record<string, string>;
 }
 
 async function ipDoPedido(): Promise<string> {
@@ -46,7 +49,9 @@ export async function registarAction(
   formData: FormData
 ): Promise<EstadoFormulario> {
   const resultado = await registar(Object.fromEntries(formData));
-  if ("erro" in resultado) return resultado;
+  if ("erro" in resultado) {
+    return { erro: resultado.erro, valores: valoresDoFormulario(formData, ["palavra_passe", "palavra_passe2"]) };
+  }
 
   const session = await getSession();
   session.utilizadorId = resultado.id;

@@ -46,9 +46,14 @@ export default async function AdminPage() {
             Olá, {admin.nome}. {totais[0].livros} livros · {totais[0].leitores} leitores.
           </p>
         </div>
-        <Link href="/admin/nova-requisicao" className="rounded bg-brand text-white px-4 py-2 text-sm font-medium">
-          + Nova requisição (balcão)
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/nova-requisicao" className="rounded bg-brand text-white px-4 py-2 text-sm font-medium">
+            + Nova requisição (balcão)
+          </Link>
+          <Link href="/admin/livros" className="rounded border border-linha bg-superficie px-4 py-2 text-sm font-medium">
+            Gerir livros
+          </Link>
+        </div>
       </div>
 
       <h2 className="text-xs font-semibold uppercase tracking-wide text-suave mb-2">Requisições</h2>
@@ -88,7 +93,7 @@ export default async function AdminPage() {
       )}
 
       <p className="text-suave text-sm">
-        Para acrescentar ou editar livros, gerir utilizadores e ver os avisos, usa o site da biblioteca no computador.
+        Para escolher capas, gerir utilizadores e ver os avisos, usa o site da biblioteca no computador.
       </p>
     </div>
   );

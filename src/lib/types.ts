@@ -13,6 +13,7 @@ export interface Livro {
   id: number;
   titulo: string;
   autor: string;
+  genero: string | null;
   isbn: string | null;
   descricao: string;
   capa: string | null;

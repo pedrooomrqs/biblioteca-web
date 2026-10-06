@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Biblioteca Escolar — site online (React)
 
-## Getting Started
+Site da biblioteca do Agrupamento de Escolas Dr. Ginestal Machado, feito em React (Next.js)
+e publicado no Vercel. É a Fase 3 do trabalho: a migração do site original em PHP + Bootstrap.
 
-First, run the development server:
+**Site publicado:** https://biblioteca-web-beta.vercel.app
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## O que faz
+
+Para alunos, professores e funcionários:
+
+- Catálogo com pesquisa por título, autor, género ou ISBN, filtros e ordenação
+- Página de cada livro: disponibilidade, prazo, exemplares só para consulta, avaliações
+- Criar conta e iniciar sessão (email ou n.º de processo)
+- Pré-requisitar um livro e cancelar a pré-requisição
+- Ver as suas requisições, prazos e multas
+- Avaliar livros com estrelas e comentário
+
+Para a administração (Dona Cacilda), em `/admin`:
+
+- Painel com contagens e os livros mais requisitados
+- Requisições: entregar, receber devoluções, cancelar, marcar multas como pagas
+- Registar uma requisição ao balcão
+- Adicionar, editar e apagar livros
+
+## Como se liga ao resto do trabalho
+
+```
+App móvel (Flutter)  ──►  API deste site (/api/...)  ──►  Supabase (PostgreSQL)
+Site online (React)  ─────────────────────────────────►  Supabase (PostgreSQL)
+Site do PC (PHP)     ─────────────────────────────────►  MySQL local (XAMPP)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+O site online e a app móvel partilham a mesma base de dados no Supabase. Por isso, uma
+reserva feita na app aparece logo em `/admin/requisicoes`, e quando a biblioteca a entrega
+ou a dá como devolvida, o estado muda também na app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tecnologias
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Parte | Tecnologia |
+|---|---|
+| Interface | React 19 com Next.js (App Router) e Tailwind CSS |
+| Base de dados | PostgreSQL no Supabase, acedida no servidor com `pg` |
+| Sessões | Cookie cifrado (`iron-session`); a app móvel usa um token |
+| Palavras-passe | `bcryptjs` (compatível com o `password_hash` do PHP) |
+| Capas dos livros | Supabase Storage |
+| Alojamento | Vercel (cada `git push` para `main` publica uma versão nova) |
 
-## Learn More
+## Estrutura do código
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/                 páginas (cada pasta é um endereço do site)
+    page.tsx           catálogo
+    livro/[id]/        página de um livro
+    entrar/, registo/  sessão e criação de conta
+    minhas-requisicoes/
+    admin/             área da administração
+    api/               API em JSON usada pela app móvel
+    actions.ts         ações dos formulários (Server Actions)
+  components/          formulários interativos
+  lib/
+    servico.ts         regras da biblioteca, partilhadas pelo site e pela API
+    requisicoes.ts     prazos, multas e datas
+    db.ts              ligação à base de dados
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API usada pela app móvel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Método | Endereço | Para quê |
+|---|---|---|
+| GET | `/api/livros?q=&disponibilidade=&prazo=&ordem=` | catálogo |
+| GET | `/api/livros/:id` | um livro e as suas avaliações |
+| POST | `/api/entrar` | iniciar sessão (devolve um token) |
+| POST | `/api/registo` | criar conta |
+| GET | `/api/eu` | quem tem sessão iniciada |
+| POST | `/api/livros/:id/pre-requisitar` | reservar um livro |
+| POST | `/api/livros/:id/avaliar` | avaliar um livro |
+| GET | `/api/requisicoes` | as minhas requisições |
+| POST | `/api/requisicoes/:id/cancelar` | cancelar uma pré-requisição |
 
-## Deploy on Vercel
+Os pedidos que exigem sessão levam o cabeçalho `Authorization: Bearer <token>`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Correr no computador
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Precisa do [Node.js](https://nodejs.org) 20 ou mais recente.
+
+```bash
+npm install
+npm run dev
+```
+
+Abre em http://localhost:3000. É preciso um ficheiro `.env.local` na raiz com:
+
+```
+DATABASE_URL=postgresql://utilizador:palavra-passe@servidor:5432/postgres
+SESSION_SECRET=uma-frase-secreta-com-32-caracteres-ou-mais
+```
+
+Este ficheiro não vai para o GitHub (está no `.gitignore`). No Vercel, os mesmos valores
+estão em Settings → Environment Variables.
+
+## Publicar
+
+O repositório está ligado ao Vercel: basta fazer `git push` para a branch `main`.

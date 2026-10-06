@@ -29,7 +29,7 @@ export default async function CatalogoPage({
           type="search"
           name="q"
           defaultValue={q}
-          placeholder="Procurar por título, autor ou ISBN"
+          placeholder="Procurar por título, autor, género ou ISBN"
           className="flex-1 min-w-[200px] rounded border border-linha px-3 py-2 text-sm"
         />
         <select name="disponibilidade" defaultValue={disponibilidade} className="rounded border border-linha px-3 py-2 text-sm">
@@ -84,7 +84,10 @@ export default async function CatalogoPage({
                 )}
                 <div className="p-3">
                   <h3 className="font-semibold text-sm leading-tight line-clamp-2">{livro.titulo}</h3>
-                  <p className="text-suave text-xs mt-1">{livro.autor}</p>
+                  <p className="text-suave text-xs mt-1">
+                    {livro.autor}
+                    {livro.genero ? ` · ${livro.genero}` : ""}
+                  </p>
                   {livro.media_nota ? (
                     <p className="text-xs mt-1 text-amber-600">
                       ★ {livro.media_nota} <span className="text-suave">({livro.total_avaliacoes})</span>

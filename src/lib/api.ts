@@ -81,6 +81,7 @@ export function livroParaApi(livro: Livro) {
     id: livro.id,
     titulo: livro.titulo,
     autor: livro.autor,
+    genero: livro.genero,
     isbn: livro.isbn,
     descricao: livro.descricao,
     capa_url: livro.capa ? capaUrl(livro.capa) : null,
