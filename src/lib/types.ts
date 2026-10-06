@@ -18,7 +18,8 @@ export interface Livro {
   capa: string | null;
   prazo: string;
   so_consulta: number;
-  exemplares: number;
+  exemplares: number; // cópias que podem ser requisitadas
+  exemplares_consulta: number; // cópias que ficam sempre na biblioteca
   criado_em: string;
   disponiveis?: number;
   media_nota?: string | null;

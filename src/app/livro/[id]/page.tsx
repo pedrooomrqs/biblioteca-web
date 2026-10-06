@@ -75,6 +75,11 @@ export default async function LivroPage({ params }: { params: Promise<{ id: stri
                 <span className="text-xs rounded-full bg-gray-100 text-suave px-2 py-1">
                   Multa por atraso: {euros(MULTA_CENTIMOS)}
                 </span>
+                {livro.exemplares_consulta > 0 && (
+                  <span className="text-xs rounded-full bg-sky-100 text-sky-800 px-2 py-1">
+                    {livro.exemplares_consulta} só para consulta
+                  </span>
+                )}
               </>
             )}
           </div>
@@ -115,7 +120,16 @@ export default async function LivroPage({ params }: { params: Promise<{ id: stri
               )
             ) : (
               <div className="rounded bg-gray-100 text-suave text-sm px-4 py-3">
-                Todos os exemplares estão requisitados neste momento. Volta a tentar mais tarde.
+                Todos os exemplares para requisitar estão ocupados neste momento. Volta a tentar mais tarde.
+              </div>
+            )}
+            {/* Livro com as duas coisas: além de requisitar, também se pode ler na biblioteca. */}
+            {!livro.so_consulta && livro.exemplares_consulta > 0 && (
+              <div className="mt-3 rounded bg-sky-50 text-sky-800 text-sm px-4 py-3">
+                {livro.exemplares_consulta === 1
+                  ? "Há também 1 exemplar"
+                  : `Há também ${livro.exemplares_consulta} exemplares`}{" "}
+                só para consulta: podes ler este livro na biblioteca sem o requisitar.
               </div>
             )}
           </div>

@@ -87,6 +87,7 @@ export function livroParaApi(livro: Livro) {
     prazo: livro.prazo,
     so_consulta: livro.so_consulta === 1,
     exemplares: livro.exemplares,
+    exemplares_consulta: livro.exemplares_consulta,
     disponiveis: livro.disponiveis ?? 0,
     media_nota: livro.media_nota ? Number(livro.media_nota) : null,
     total_avaliacoes: livro.total_avaliacoes ?? 0,
