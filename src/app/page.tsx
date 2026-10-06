@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { pool } from "@/lib/db";
 import { PRAZOS, capaUrl } from "@/lib/constants";
-import type { Livro } from "@/lib/types";
+import { listarLivros } from "@/lib/servico";
 
 export default async function CatalogoPage({
   searchParams,
@@ -14,49 +13,7 @@ export default async function CatalogoPage({
   const prazoFiltro = sp.prazo ?? "";
   const ordem = sp.ordem ?? "titulo";
 
-  const condicoes: string[] = [];
-  const params: unknown[] = [];
-  let i = 1;
-
-  if (q !== "") {
-    params.push(`%${q}%`, `%${q}%`, `%${q.replace(/[\s-]/g, "")}%`);
-    condicoes.push(`(b.titulo ILIKE $${i} OR b.autor ILIKE $${i + 1} OR b.isbn ILIKE $${i + 2})`);
-    i += 3;
-  }
-  if (disponibilidade === "disponivel") {
-    condicoes.push(
-      `b.so_consulta = 0 AND b.exemplares - (
-        SELECT COUNT(*) FROM requisicoes r WHERE r.livro_id = b.id AND r.estado IN ('pre_requisitado', 'entregue')
-      ) > 0`
-    );
-  } else if (disponibilidade === "so_consulta") {
-    condicoes.push("b.so_consulta = 1");
-  }
-  if (Object.prototype.hasOwnProperty.call(PRAZOS, prazoFiltro)) {
-    params.push(prazoFiltro);
-    condicoes.push(`b.prazo = $${i}`);
-    i += 1;
-  }
-
-  const ordens: Record<string, string> = {
-    titulo: "b.titulo",
-    autor: "b.autor, b.titulo",
-    avaliacao: "media_nota DESC NULLS LAST, b.titulo",
-    recente: "b.criado_em DESC",
-  };
-  const ordemSql = ordens[ordem] ?? ordens.titulo;
-  const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
-
-  const { rows: livros } = await pool.query<Livro>(
-    `SELECT b.*, (b.exemplares - (
-         SELECT COUNT(*) FROM requisicoes r
-         WHERE r.livro_id = b.id AND r.estado IN ('pre_requisitado', 'entregue')
-     ))::int AS disponiveis,
-     (SELECT ROUND(AVG(a.nota), 1) FROM avaliacoes a WHERE a.livro_id = b.id) AS media_nota,
-     (SELECT COUNT(*) FROM avaliacoes a WHERE a.livro_id = b.id)::int AS total_avaliacoes
-     FROM livros b ${where} ORDER BY ${ordemSql}`,
-    params
-  );
+  const livros = await listarLivros({ q, disponibilidade, prazo: prazoFiltro, ordem });
 
   return (
     <div>

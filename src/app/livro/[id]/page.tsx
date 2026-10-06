@@ -1,60 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { pool } from "@/lib/db";
 import { PRAZOS, MULTA_CENTIMOS, capaUrl } from "@/lib/constants";
 import { utilizadorAtual } from "@/lib/auth";
-import { preRequisitarAction } from "../../actions";
+import { dataPt, euros } from "@/lib/requisicoes";
+import { detalheLivro } from "@/lib/servico";
 import { AvaliarForm } from "@/components/AvaliarForm";
-import type { Livro, Requisicao, Avaliacao } from "@/lib/types";
-
-function euros(centimos: number): string {
-  return (centimos / 100).toFixed(2).replace(".", ",") + "€";
-}
-
-function dataPt(data: string | null): string {
-  if (!data) return "—";
-  const [ano, mes, dia] = data.slice(0, 10).split("-");
-  return `${dia}/${mes}/${ano}`;
-}
+import { PreRequisitarForm } from "@/components/PreRequisitarForm";
 
 export default async function LivroPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const livroId = Number(id);
   if (!Number.isInteger(livroId)) notFound();
 
-  const { rows: livroRows } = await pool.query<Livro>("SELECT * FROM livros WHERE id = $1", [livroId]);
-  const livro = livroRows[0];
-  if (!livro) notFound();
-
-  const { rows: dispRows } = await pool.query<{ disponiveis: number }>(
-    `SELECT (b.exemplares - (
-       SELECT COUNT(*) FROM requisicoes r WHERE r.livro_id = b.id AND r.estado IN ('pre_requisitado', 'entregue')
-     ))::int AS disponiveis FROM livros b WHERE b.id = $1`,
-    [livroId]
-  );
-  const disponiveis = dispRows[0]?.disponiveis ?? 0;
-
   const utilizador = await utilizadorAtual();
-  let minhaRequisicao: Requisicao | null = null;
-  if (utilizador) {
-    const { rows } = await pool.query<Requisicao>(
-      `SELECT * FROM requisicoes WHERE utilizador_id = $1 AND livro_id = $2
-       AND estado IN ('pre_requisitado', 'entregue') ORDER BY id DESC LIMIT 1`,
-      [utilizador.id, livroId]
-    );
-    minhaRequisicao = rows[0] ?? null;
-  }
-
-  const { rows: avaliacoes } = await pool.query<Avaliacao>(
-    `SELECT a.*, u.nome AS utilizador_nome FROM avaliacoes a
-     JOIN utilizadores u ON u.id = a.utilizador_id
-     WHERE a.livro_id = $1 ORDER BY a.atualizada_em DESC`,
-    [livroId]
-  );
+  const detalhe = await detalheLivro(livroId, utilizador?.id ?? null);
+  if (!detalhe) notFound();
+  const { livro, disponiveis, avaliacoes, media, minhaRequisicao } = detalhe;
   const minhaAvaliacao = utilizador ? avaliacoes.find((a) => a.utilizador_id === utilizador.id) : null;
-  const media = avaliacoes.length
-    ? Math.round((avaliacoes.reduce((s, a) => s + a.nota, 0) / avaliacoes.length) * 10) / 10
-    : null;
 
   return (
     <div>
@@ -142,18 +104,7 @@ export default async function LivroPage({ params }: { params: Promise<{ id: stri
               </div>
             ) : disponiveis > 0 ? (
               utilizador ? (
-                <form action={preRequisitarAction.bind(null, livro.id)}>
-                  <button
-                    type="submit"
-                    className="rounded bg-brand text-white px-5 py-2.5 font-medium hover:bg-brand-escura"
-                  >
-                    Pré-requisitar este livro
-                  </button>
-                  <p className="text-suave text-xs mt-2">
-                    A Dona Cacilda deixa o livro de lado para ti. Levanta-o na biblioteca para começar o prazo de{" "}
-                    {PRAZOS[livro.prazo]}.
-                  </p>
-                </form>
+                <PreRequisitarForm livroId={livro.id} prazo={PRAZOS[livro.prazo]} />
               ) : (
                 <Link
                   href={`/entrar?next=/livro/${livro.id}`}
